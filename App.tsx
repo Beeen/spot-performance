@@ -3,7 +3,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import useCachedResources from './hooks/useCachedResources';
 import useColorScheme from './hooks/useColorScheme';
-import Navigation from './navigation';
+import Navigation from '@navigation/Home';
+import AuthUserProvider from '@context/AuthUserProvider';
+import Routes from '@navigation/Routes'
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -14,9 +16,24 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
+         <AuthUserProvider>
+            <Routes/>
+        </AuthUserProvider>
       </SafeAreaProvider>
+      // To re-use later
+      // <SafeAreaProvider>
+      //   <Navigation colorScheme={colorScheme} />
+      //   <StatusBar />
+      // </SafeAreaProvider>
+      //   <SafeAreaView style={styles.safeArea}>
+      //   <Provider store={store}>
+      //     <ReactReduxFirebaseProvider {...rrfProps}>
+      //       <AuthUserProvider>
+      //         <Routes />
+      //       </AuthUserProvider>
+      //     </ReactReduxFirebaseProvider>
+      //   </Provider>
+      // </SafeAreaView>
     );
   }
 }
