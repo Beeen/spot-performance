@@ -14,74 +14,59 @@ import {
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import FirebaseService from '@services/firebase/FirebaseService';
-import AuthUserContext from '@context/AuthUserContext';
+//import AuthUserContext from '@context/AuthUserContext';
+import { OnboardingStackScreenProps } from 'types';
+import { useState } from 'react';
 
-class SignupNickname extends React.Component {
+export default function SignupNickname({ navigation }: OnboardingStackScreenProps<'SignupNickname'>) {
 
-    static contextType = AuthUserContext;
+    //static contextType = AuthUserContext;
+    const [text, setText] = useState('')
 
-    state = {
-        input: ''
-    };
-
-    constructor(props) {
-        super(props)
-    }
-
-    createAccount() {
+    function createAccount() {
 
         const firebaseService = new FirebaseService()
 
-        console.log('Creating profile: ' + this.context.userId)
+        // console.log('Creating profile: ' + this.context.userId)
 
-        firebaseService.createProfile(this.state.input,this.context.userId)
-            .then(({ ref }) => {
+        // firebaseService.createProfile(this.state.input,this.context.userId)
+        //     .then(({ ref }) => {
 
-                if (ref != undefined) {
-                    console.log('The profile has been created')
-                    this.context.onLoadingFinished()
-                }
-                else{
-                    //Ben : I don't know why it returns 'undefined' even when it succeeds, ignoring errors
-                    console.log('The profile has been created')
-                    this.context.onLoadingFinished()
-                }
-            })
+        //         if (ref != undefined) {
+        //             console.log('The profile has been created')
+        //             this.context.onLoadingFinished()
+        //         }
+        //         else{
+        //             //Ben : I don't know why it returns 'undefined' even when it succeeds, ignoring errors
+        //             console.log('The profile has been created')
+        //             this.context.onLoadingFinished()
+        //         }
+        //     })
     }
 
-    render() {
-        const { input } = this.state;
+    
 
-        return (
-            <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }}>
-                <SafeAreaView style={{ flex: 1 }}>
-                    <View style={styles.container}>
-                        <Text style={styles.label}>C'est quoi ton prénom?</Text>
-                        {/* <Input
-                            placeholder='RECHERCHER'
-                            style={styles.input}
-                        /> */}
-                        <TextInput value={input} onChangeText={input => this.setState({ input })} style={styles.input}/>
-                    </View>
-                    <View style={styles.container}>
-                            <TouchableOpacity style={styles.continueBackground} onPress={() => this.createAccount()}>
-                                <Text style={styles.continueButtonText}>
-                                    Continuer
-                                </Text>
-                            </TouchableOpacity>
-                    </View>
-                </SafeAreaView>
-            </TouchableWithoutFeedback>
-        );
-    }
-
-    onChangeText(text) {
-
-    }
-
-    componentDidMount() {
-
-    }
+    return (
+        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }}>
+            <SafeAreaView style={{ flex: 1 }}>
+                <View style={styles.container}>
+                    <Text style={styles.label}>C'est quoi ton prénom?</Text>
+                    {/* <Input
+                        placeholder='RECHERCHER'
+                        style={styles.input}
+                    /> */}
+                    <TextInput value={text} onChangeText={input => setText(input)} style={styles.input}/>
+                </View>
+                <View style={styles.container}>
+                        <TouchableOpacity style={styles.continueBackground} onPress={() => createAccount()}>
+                            <Text style={styles.continueButtonText}>
+                                Continuer
+                            </Text>
+                        </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        </TouchableWithoutFeedback>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -122,5 +107,3 @@ const styles = StyleSheet.create({
         color: "#FFFFFF"
     }
 });
-
-export default SignupNickname;

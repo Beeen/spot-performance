@@ -6,27 +6,28 @@ import {
 } from 'react-native';
 
 import firebase from '@services/firebase/FirebaseConfig';
-import AuthUserContext from '@context/AuthUserContext';
+//import AuthUserContext from '@context/AuthUserContext';
 import FirebaseService from '@services/firebase/FirebaseService';
+import { OnboardingStackScreenProps } from 'types';
 
-const AppLoading = (props) => {
-    const { state, onLoadingFinished, setUserId } = useContext(AuthUserContext);
+export default function AppLoading({ navigation }: OnboardingStackScreenProps<'AppLoading'>) {
+    //const { state, onLoadingFinished, setUserId } = useContext(AuthUserContext);
 
-    checkUserAccount = (authUser) => {
+    const checkUserAccount = (authUser: any) => {
 
         console.log('AppLoading: ' + authUser.uid)
-        setUserId(authUser.uid)
+        //setUserId(authUser.uid)
 
         const firebaseService = new FirebaseService()
         firebaseService.loadUser(authUser.uid)
             .then(({ userSnapshot }) => {
                 if (userSnapshot.exists) {
                     console.log('AppLoading: The user has an account')
-                    onLoadingFinished()
+                    //onLoadingFinished()
                 }
                 else{
                     console.log('AppLoading: The user doesn\'t have an account')
-                    props.navigation.navigate('Nickname')
+                    navigation.navigate('SignupNickname')
                 }
             })
     }
@@ -49,7 +50,7 @@ const AppLoading = (props) => {
         // // unsubscribe auth listener on unmount
         // return unsubscribeAuth;
 
-        const unsubscribe = firebase.auth().onAuthStateChanged((authUser) => { // detaching the listener
+        const unsubscribe = firebase.auth().onAuthStateChanged((authUser: any) => { // detaching the listener
 
             console.log('AppLoading: AuthStateChanged')
 
@@ -58,7 +59,7 @@ const AppLoading = (props) => {
                 checkUserAccount(authUser)
             } else {
                 // No user is signed in...code to handle unauthenticated users.
-                props.navigation.navigate('Login') 
+                navigation.navigate('Login') 
             }
         });
         return () => unsubscribe(); // unsubscribing from the listener when the component is unmounting.
@@ -85,5 +86,3 @@ const styles = StyleSheet.create({
         resizeMode: 'contain'
     }
 });
-
-export default AppLoading;

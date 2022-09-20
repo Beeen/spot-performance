@@ -13,6 +13,7 @@ declare global {
   }
 }
 
+// Home Stack Types
 export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: undefined;
@@ -24,12 +25,33 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
   Screen
 >;
 
+// Home Tabs Stack Types
 export type RootTabParamList = {
-  TabOne: undefined;
-  TabTwo: undefined;
+  BookTab: undefined;
+  PurchaseTab: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<
   BottomTabScreenProps<RootTabParamList, Screen>,
   NativeStackScreenProps<RootStackParamList>
 >;
+
+// Onboarding Navigation Types
+export type OnboardingStackParamList = {
+    AppLoading: undefined;
+    Login: undefined;
+    SignupNickname: undefined;
+};
+
+export type OnboardingStackScreenProps<Screen extends keyof OnboardingStackParamList> = NativeStackScreenProps<
+  OnboardingStackParamList,
+  Screen
+>;
+
+export type AuthUserContextType = {
+  isLoading: true,
+  isSignedIn: false,
+  isProfileLoaded: false,
+  userId: '',
+  onLoadingFinished: () => void
+};

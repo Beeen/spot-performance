@@ -15,64 +15,66 @@ import firebase from '@services/firebase/FirebaseConfig'
 import Constants from 'expo-constants';
 import FirebaseService from '@services/firebase/FirebaseService';
 import { LogBox } from 'react-native';
-import AuthUserContext from '@context/AuthUserContext';
+//import AuthUserContext from '@context/AuthUserContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useContext } from 'react';
+import { useGlobalContext } from '@context/MyGlobalContext';
+import { OnboardingStackScreenProps } from 'types';
+import { useState } from 'react';
 
-type MyProps = {
-    // using `interface` is also ok
-    message: string;
-    navigation: NativeStackNavigationProp<any,any>;
-  };
-type MyState = {
-    errorMessage: string;
-    loading: boolean;
-    uid: string;
-};
-class LoginScreen extends React.Component<MyProps, MyState> {
-    static navigation = useNavigation();
+// type MyProps = {
+//     // using `interface` is also ok
+//     message: string;
+//     navigation: NativeStackNavigationProp<any,any>;
+//   };
+// type MyState = {
+//     errorMessage: string;
+//     loading: boolean;
+//     uid: string;
+// };
+export default function Login({ navigation }: OnboardingStackScreenProps<'Login'>) {
 
-    static contextType = AuthUserContext;
-    state: MyState = { errorMessage: '', loading: false, uid: '' };
+    // static contextType = AuthUserContext
+    // declare context: React.ContextType<typeof AuthUserContext>
+    //const { copy, setCopy } = useGlobalContext()
+    const [uid, setUid] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
-    constructor(props: MyProps) {
-        super(props)
+    const signInAnynomously = () => {
+
     }
 
-    signInAnynomously = () => {
-
-    }
-
-    onLoginSuccess(authUser) {
+    const onLoginSuccess = (authUser: any): void => {
 
         // TODO: Check if the profile exist in database
         console.log('onLoginSuccess: ' + authUser.uid)
         //this.state.setUserId(authUser.uid)
-        this.setState((uid) => ({
-            uid: authUser.uid,
-          }));
+        setUid(authUser.uid)
 
         const firebaseService = new FirebaseService()
         firebaseService.loadUser(authUser.uid)
             .then(({ userSnapshot }) => {
                 if (userSnapshot.exists) {
                     console.log('onLoginSuccess: The user has an account')
-                    this.context.onLoadingFinished()
+                    //this.context.onLoadingFinished()
                 }
                 else{
                     console.log('onLoginSuccess: The user doesn\'t have an account')
-                    this.props.navigation.navigate('Nickname')
+                    navigation.navigate('SignupNickname')
                 }
             })
         
     }
 
-    onLoginFailure(errorMessage: string) {
-        this.setState({ errorMessage: errorMessage, loading: false });
+    const onLoginFailure = (errorMessage: string) => {
+        setLoading(false)
+        setErrorMessage(errorMessage)
     }
 
-    renderLoading() {
-        if (this.state.loading) {
+    const renderLoading = () => {
+        if (loading) {
             return (
                 <View>
                     <ActivityIndicator size={'large'} />
@@ -81,38 +83,32 @@ class LoginScreen extends React.Component<MyProps, MyState> {
         }
     }
 
-    render() {
-        return (
-            <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }}>
-                <SafeAreaView style={{ flex: 1 }}>
-                    <KeyboardAvoidingView style={styles.container} behavior="padding">
-                        <View style={styles.topContainer}>
-                            <Image style={styles.logo} source={require('@assets/logo-green.png')} />
-                            <Text style={styles.header}>
-                                YourFeed
+    return (
+        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }}>
+            <SafeAreaView style={{ flex: 1 }}>
+                <KeyboardAvoidingView style={styles.container} behavior="padding">
+                    <View style={styles.topContainer}>
+                        <Image style={styles.logo} source={require('@assets/logo-green.png')} />
+                        <Text style={styles.header}>
+                            YourFeed
+                        </Text>
+                        <Text style={styles.subtitle}>
+                            Supporte tes artistes locaux
+                        </Text>
+                    </View>
+                    {renderLoading()}
+                    <View style={styles.bottomContainer}>
+                        <TouchableOpacity style={styles.facebookButtonBackground} onPress={() => signInAnynomously()}>
+                            <Text style={styles.facebookButtonText}>
+                                Me connecter avec Facebook
                             </Text>
-                            <Text style={styles.subtitle}>
-                                Supporte tes artistes locaux
-                            </Text>
-                        </View>
-                        {this.renderLoading()}
-                        <View style={styles.bottomContainer}>
-                            <TouchableOpacity style={styles.facebookButtonBackground} onPress={() => this.signInAnynomously()}>
-                                <Text style={styles.facebookButtonText}>
-                                    Me connecter avec Facebook
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </KeyboardAvoidingView>
-                </SafeAreaView>
-            </TouchableWithoutFeedback>
-        );
+                        </TouchableOpacity>
+                    </View>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </TouchableWithoutFeedback>
+    );
     }
-
-    componentDidMount() {
-
-    }
-}
 
 const styles = StyleSheet.create({
     container: {
@@ -162,5 +158,3 @@ const styles = StyleSheet.create({
         color: "#FFFFFF"
     }
 });
-
-export default LoginScreen;

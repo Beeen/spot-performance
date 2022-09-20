@@ -4,18 +4,18 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {StyleSheet, View} from 'react-native';
 import Login from './Login'
 import AppLoading from './AppLoading'
-import Home from '@screens/Home'
 import SignupNickname from './SignupNickname'
+import { OnboardingStackParamList } from 'types';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-const OnboardingStack = createStackNavigator();
+const OnboardingStack = createNativeStackNavigator<OnboardingStackParamList>();
 
 function OnboardingContainer() {
     return (
-        //<OnboardingStack.Navigator screenOptions={{headerShown: false}} style={styles.navigator}>
         <OnboardingStack.Navigator screenOptions={{headerShown: false}}>
             <OnboardingStack.Screen name="AppLoading" component={AppLoading}/>
             <OnboardingStack.Screen name="Login" component={Login}/>
-            <OnboardingStack.Screen name="Nickname" component={SignupNickname}/>
+            <OnboardingStack.Screen name="SignupNickname" component={SignupNickname}/>
         </OnboardingStack.Navigator>
     )
 }
