@@ -1,104 +1,82 @@
 // import React from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import { AuthUserContextType } from 'types';
-// import AuthUserProvider from './AuthUserProvider';
 
-// export const AuthUserContext = React.createContext<AuthUserContextType | undefined>(
-//     undefined
-// );
 
-export const AuthUserContext = React.createContext<AuthUserContextType>({
-    isLoading: true,
-    isSignedIn: false,
-    isProfileLoaded: false,
-    userId: '',
-    onLoadingFinished: () => {}
-});
+export const AuthUserContext = React.createContext<AuthUserContextType | null>(null);
 
-// import * as React from 'react';
+type Action =
+ | { type: 'LOADING_FINISHED'}
+ | { type: 'SET_USER_UID', userId: string}
+ | { type: 'SIGN_OUT'};
+interface Props {
+    children: React.ReactNode;
+}  
+const AuthUserProvider: React.FC<Props> = ({ children }) => {
+    const [isLoading, setLoading] = useState<boolean>(true)
+    const [isSignedIn, setIsSignedIn] = useState<boolean>(false)
+    const [isProfileLoaded, setIsProfileLoaded] = useState<boolean>(false)
+    const [userId, setUser] = useState<string>('')
 
-// interface Props {
-//     children: React.ReactNode;
-// }
 
-// import { AuthUserContextType } from 'types';
+    const onLoadingFinished = () => {
+        console.log('On Loading Finished')
+        //this.setState({isLoading:false});
+        dispatch({ type: 'LOADING_FINISHED' })
+    };
 
-// export const AuthUserContext = React.createContext<AuthUserContextType | null>(null);
+    const onSignOut = () => {
+        console.log('On Signed Out')
+        //this.setState({isLoading:true});
+        dispatch({ type: 'SIGN_OUT' })
+    };
 
-// const AuthUserProvider: React.FC<Props> = ({ children }) => {
-  
-//     // state = {
-//   //   isLoading: true,
-//   //   userId: null,
-//   // }
+    const setUserId = (uid: string) => {
+        console.log('Retrieved user\'s firebase UID: ' + uid)
+        //this.setState({userId:uid});
+        dispatch({ type: 'SET_USER_UID', userId: uid })
+    }
 
-//   const onLoadingFinished = () => {
-//     console.log('On Loading Finished')
-//     //this.setState({isLoading:false});
-//     dispatch({ type: 'LOADING_FINISHED' })
-//   };
+    const [state, dispatch] = React.useReducer(
+    (prevState: any, action: Action) => {
+        switch (action.type) {
+        case 'LOADING_FINISHED':
+            return {
+            ...prevState,
+            isLoading: false,
+            };
+        case 'SET_USER_UID':
+            return {
+            ...prevState,
+            userId: action.userId,
+            };
+        case 'SIGN_OUT':
+            return {
+            ...prevState,
+            isLoading: true,
+            userToken: null,
+            };
+        }
+    },
+    {
+        isLoading: true,
+        userId: null,
+    }
+    );
 
-//   const onSignOut = () => {
-//     console.log('On Signed Out')
-//     //this.setState({isLoading:true});
-//     dispatch({ type: 'SIGN_OUT' })
-//   };
+    return (
+    <AuthUserContext.Provider value={{
+        isLoading,
+        isSignedIn,
+        isProfileLoaded,
+        userId,
+        onLoadingFinished,
+        onSignOut,
+        setUserId
+    }}>
+        {children}
+    </AuthUserContext.Provider>
+    );
+}
 
-//   const setUserId = (uid: string) => {
-//     console.log('Retrieved user\'s firebase UID: ' + uid)
-//     //this.setState({userId:uid});
-//     dispatch({ type: 'SET_USER_UID', userId: uid })
-//   }
-
-//   const [state, dispatch] = React.useReducer(
-//     (prevState, action) => {
-//       switch (action.type) {
-//         case 'LOADING_FINISHED':
-//           return {
-//             ...prevState,
-//             isLoading: false,
-//           };
-//         case 'SET_USER_UID':
-//           return {
-//             ...prevState,
-//             userId: action.userId,
-//           };
-//         case 'SIGN_OUT':
-//           return {
-//             ...prevState,
-//             isLoading: true,
-//             userToken: null,
-//           };
-//       }
-//     },
-//     {
-//       isLoading: true,
-//       userId: null,
-//     }
-//   );
-
-//   // const authContext = React.useMemo(
-//   //   () => ({
-//   //     onLoadingFinished: () => dispatch({ type: 'LOADING_FINISHED' }),
-//   //     signOut: () => dispatch({ type: 'SIGN_OUT' }),
-//   //     setUserId: (userId) => dispatch({ type: 'SET_USER_UID', userId: userId })
-//   //   }),
-//   //   []
-//   // );
-
-//   return (
-//     <AuthUserContext.Provider value={{
-//       isLoading: state.isLoading,
-//       isSignedIn: state.isSignedIn,
-//       isProfileLoaded: state.isProfileLoaded,
-//       userId: state.userId,
-//       onLoadingFinished: onLoadingFinished,
-//       onSignOut: onSignOut,
-//       setUserId: setUserId
-//     }}>
-//       {children}
-//     </AuthUserContext.Provider>
-//   );
-// };
-
-// export default AuthUserProvider;
+export default AuthUserProvider;

@@ -1,4 +1,6 @@
-import * as firebase from 'firebase';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from "firebase/auth";
+
 
 // Optionally import the services that you want to use
 //import "firebase/auth";
@@ -19,9 +21,11 @@ const firebaseConfig = {
   measurementId: "G-H12YSDDNMC"
 };
 
-firebase.initializeApp(firebaseConfig);
+export default firebase = initializeApp(firebaseConfig);
 
-export default firebase;
+// Initialize Firebase Authentication and get a reference to the service
+export const auth = getAuth(firebase);
+
 
 /*
 

@@ -88,7 +88,7 @@ export default function Login({ navigation }: OnboardingStackScreenProps<'Login'
             <SafeAreaView style={{ flex: 1 }}>
                 <KeyboardAvoidingView style={styles.container} behavior="padding">
                     <View style={styles.topContainer}>
-                        <Image style={styles.logo} source={require('@assets/logo-green.png')} />
+                        <Image style={styles.logo} source={require('@assets/logo.png')} />
                         <Text style={styles.header}>
                             YourFeed
                         </Text>

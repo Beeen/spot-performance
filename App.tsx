@@ -3,8 +3,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import useCachedResources from './hooks/useCachedResources';
 import useColorScheme from './hooks/useColorScheme';
-import Navigation from '@navigation/Home';
-//import { AuthUserProvider } from '@context/AuthUserProvider';
+import Navigation from '@screens/home/Home';
+import AuthUserProvider from '@context/AuthUserContext';
 import Routes from '@navigation/Routes'
 import { MyGlobalContext } from '@context/MyGlobalContext';
 
@@ -17,11 +17,9 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <MyGlobalContext.Provider value= {{ copy: "Bonjour", setCopy: () => {} }}>
-         {/* <AuthUserProvider> */}
+         <AuthUserProvider>
             <Routes/>
-        {/* </AuthUserProvider> */}
-        </MyGlobalContext.Provider>
+        </AuthUserProvider>
       </SafeAreaProvider>
       // To re-use later
       // <SafeAreaProvider>

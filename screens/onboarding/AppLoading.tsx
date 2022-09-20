@@ -5,7 +5,7 @@ import {
     SafeAreaView,
 } from 'react-native';
 
-import firebase from '@services/firebase/FirebaseConfig';
+import firebase, {auth} from '@services/firebase/FirebaseConfig';
 //import AuthUserContext from '@context/AuthUserContext';
 import FirebaseService from '@services/firebase/FirebaseService';
 import { OnboardingStackScreenProps } from 'types';
@@ -50,7 +50,7 @@ export default function AppLoading({ navigation }: OnboardingStackScreenProps<'A
         // // unsubscribe auth listener on unmount
         // return unsubscribeAuth;
 
-        const unsubscribe = firebase.auth().onAuthStateChanged((authUser: any) => { // detaching the listener
+        const unsubscribe = auth.onAuthStateChanged((authUser: any) => { // detaching the listener
 
             console.log('AppLoading: AuthStateChanged')
 
@@ -67,7 +67,7 @@ export default function AppLoading({ navigation }: OnboardingStackScreenProps<'A
 
     return (
         <SafeAreaView style={styles.container}>
-            <Image style={styles.logo} source={require('@assets/logo-green.png')} />
+            <Image style={styles.logo} source={require('@assets/logo.png')} />
         </SafeAreaView>
     );
 }

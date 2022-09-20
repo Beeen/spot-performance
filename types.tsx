@@ -49,9 +49,11 @@ export type OnboardingStackScreenProps<Screen extends keyof OnboardingStackParam
 >;
 
 export type AuthUserContextType = {
-  isLoading: true,
-  isSignedIn: false,
-  isProfileLoaded: false,
-  userId: '',
-  onLoadingFinished: () => void
+  isLoading: boolean;
+  isSignedIn: boolean;
+  isProfileLoaded: boolean;
+  userId: string;
+  onLoadingFinished: () => void;
+  onSignOut: () => void;
+  setUserId: (userId: string) => void;
 };
