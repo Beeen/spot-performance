@@ -5,15 +5,16 @@ import {
     SafeAreaView,
 } from 'react-native';
 
-import firebase, {auth} from '@services/firebase/FirebaseConfig';
+import firebase from '@services/firebase/FirebaseConfig';
 //import AuthUserContext from '@context/AuthUserContext';
 import FirebaseService from '@services/firebase/FirebaseService';
 import { OnboardingStackScreenProps } from 'types';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 
 export default function AppLoading({ navigation }: OnboardingStackScreenProps<'AppLoading'>) {
     //const { state, onLoadingFinished, setUserId } = useContext(AuthUserContext);
 
-    const checkUserAccount = (authUser: any) => {
+    const checkUserAccount = (authUser: User) => {
 
         console.log('AppLoading: ' + authUser.uid)
         //setUserId(authUser.uid)
@@ -49,14 +50,14 @@ export default function AppLoading({ navigation }: OnboardingStackScreenProps<'A
 
         // // unsubscribe auth listener on unmount
         // return unsubscribeAuth;
-
-        const unsubscribe = auth.onAuthStateChanged((authUser: any) => { // detaching the listener
+        const auth = getAuth(firebase);
+        const unsubscribe = onAuthStateChanged(auth, (user) => { // detaching the listener
 
             console.log('AppLoading: AuthStateChanged')
 
-            if (authUser) {
+            if (user) {
                 // ...your code to handle authenticated users. 
-                checkUserAccount(authUser)
+                checkUserAccount(user)
             } else {
                 // No user is signed in...code to handle unauthenticated users.
                 navigation.navigate('Login') 

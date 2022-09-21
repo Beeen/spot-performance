@@ -11,20 +11,19 @@ import { getAuth } from "firebase/auth";
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyCrnwdCE3zinaraYAB8KR7W3Ndor8YaboM",
-  authDomain: "yourfeed-ab0c3.firebaseapp.com",
-  databaseURL: "https://yourfeed-ab0c3.firebaseio.com",
-  projectId: "yourfeed-ab0c3",
-  storageBucket: "yourfeed-ab0c3.appspot.com",
-  messagingSenderId: "1048859722870",
-  appId: "1:1048859722870:web:fd679542c948dd8cce8b57",
-  measurementId: "G-H12YSDDNMC"
+  apiKey: "AIzaSyB4V3yo0u9vJZMeyqEQKpplPBYIV5u40pU",
+  authDomain: "spotperformance-5602a.firebaseapp.com",
+  projectId: "spotperformance-5602a",
+  storageBucket: "spotperformance-5602a.appspot.com",
+  messagingSenderId: "94051025480",
+  appId: "1:94051025480:web:94b3a7f5760a858774ce7d",
+  measurementId: "G-STP4Q27Q1W"
 };
 
 export default firebase = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(firebase);
+//export const auth = getAuth(firebase);
 
 
 /*

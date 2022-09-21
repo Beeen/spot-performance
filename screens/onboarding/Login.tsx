@@ -19,34 +19,32 @@ import { LogBox } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useContext } from 'react';
-import { useGlobalContext } from '@context/MyGlobalContext';
 import { OnboardingStackScreenProps } from 'types';
 import { useState } from 'react';
+import { getAuth, signInAnonymously, User } from "firebase/auth";
 
-// type MyProps = {
-//     // using `interface` is also ok
-//     message: string;
-//     navigation: NativeStackNavigationProp<any,any>;
-//   };
-// type MyState = {
-//     errorMessage: string;
-//     loading: boolean;
-//     uid: string;
-// };
 export default function Login({ navigation }: OnboardingStackScreenProps<'Login'>) {
 
-    // static contextType = AuthUserContext
-    // declare context: React.ContextType<typeof AuthUserContext>
-    //const { copy, setCopy } = useGlobalContext()
     const [uid, setUid] = useState('')
     const [loading, setLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
 
     const signInAnynomously = () => {
-
+        const auth = getAuth(firebase)
+        signInAnonymously(auth)
+        .then(() => {
+            // Signed in..
+            //onLoginSuccess()
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            // ...
+            onLoginFailure(errorMessage)
+        });
     }
 
-    const onLoginSuccess = (authUser: any): void => {
+    const onLoginSuccess = (authUser: User): void => {
 
         // TODO: Check if the profile exist in database
         console.log('onLoginSuccess: ' + authUser.uid)
@@ -90,17 +88,17 @@ export default function Login({ navigation }: OnboardingStackScreenProps<'Login'
                     <View style={styles.topContainer}>
                         <Image style={styles.logo} source={require('@assets/logo.png')} />
                         <Text style={styles.header}>
-                            YourFeed
+                            Spot Performance
                         </Text>
                         <Text style={styles.subtitle}>
-                            Supporte tes artistes locaux
+                            Make it yours
                         </Text>
                     </View>
                     {renderLoading()}
                     <View style={styles.bottomContainer}>
                         <TouchableOpacity style={styles.facebookButtonBackground} onPress={() => signInAnynomously()}>
                             <Text style={styles.facebookButtonText}>
-                                Me connecter avec Facebook
+                                Sign-in
                             </Text>
                         </TouchableOpacity>
                     </View>

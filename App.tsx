@@ -6,7 +6,6 @@ import useColorScheme from './hooks/useColorScheme';
 import Navigation from '@screens/home/Home';
 import AuthUserProvider from '@context/AuthUserContext';
 import Routes from '@navigation/Routes'
-import { MyGlobalContext } from '@context/MyGlobalContext';
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
