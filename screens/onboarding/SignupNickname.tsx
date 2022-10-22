@@ -12,39 +12,36 @@ import {
     Keyboard,
     Alert
 } from 'react-native';
-import { Input } from 'react-native-elements';
 import FirebaseService from '@services/firebase/FirebaseService';
-//import AuthUserContext from '@context/AuthUserContext';
-import { OnboardingStackScreenProps } from 'types';
-import { useState } from 'react';
+import { AuthUserContext } from '@context/AuthUserContext';
+import { AuthUserContextType, OnboardingStackScreenProps } from 'types';
+import { useContext, useState } from 'react';
 
 export default function SignupNickname({ navigation }: OnboardingStackScreenProps<'SignupNickname'>) {
 
-    //static contextType = AuthUserContext;
+    const {userId, onLoadingFinished} = useContext(AuthUserContext) as AuthUserContextType;
     const [text, setText] = useState('')
 
     function createAccount() {
 
         const firebaseService = new FirebaseService()
 
-        // console.log('Creating profile: ' + this.context.userId)
+        console.log('Creating profile: ' + userId)
 
-        // firebaseService.createProfile(this.state.input,this.context.userId)
-        //     .then(({ ref }) => {
+        firebaseService.createProfile(text, userId)
+            .then(({ ref }) => {
 
-        //         if (ref != undefined) {
-        //             console.log('The profile has been created')
-        //             this.context.onLoadingFinished()
-        //         }
-        //         else{
-        //             //Ben : I don't know why it returns 'undefined' even when it succeeds, ignoring errors
-        //             console.log('The profile has been created')
-        //             this.context.onLoadingFinished()
-        //         }
-        //     })
+                if (ref != undefined) {
+                    console.log('The profile has been created')
+                    onLoadingFinished()
+                }
+                else{
+                    //Ben : I don't know why it returns 'undefined' even when it succeeds, ignoring errors
+                    console.log('The profile has been created')
+                    onLoadingFinished()
+                }
+            })
     }
-
-    
 
     return (
         <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }}>

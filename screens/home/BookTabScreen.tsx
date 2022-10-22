@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import EditScreenInfo from '../../components/EditScreenInfo';
@@ -8,12 +8,60 @@ import {Agenda, DateData, AgendaEntry, AgendaSchedule} from 'react-native-calend
 
 export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTab'>) {
 
-  const [items, setItems] = useState()
+  const [items, setItems] = useState({})
+  const [bookings, myBookings] = useState()
+  const [isFiltered, setFiltered] = useState(false)
 
-  const loadItems = () => {}
+  // Should be called only once when component mounts
+  useEffect(() => {
+    
+  }, []);
+
+  // Should be called when the bookings on the day we are observing changes
+  useEffect(() => {
+    
+  }, [bookings]);
+
+  // Should be called when the user filters or un-filters the bookings
+  useEffect(() => {
+    
+  }, [isFiltered]);
+
+  const loadItems = (day: DateData) => {
+    console.log('Loading items for day: ' + day.dateString)
+
+  }
+
+  const updateBookings = () => {
+    items[strTime] = [];
+        
+    const numItems = Math.floor(Math.random() * 3 + 1);
+    for (let j = 0; j < numItems; j++) {
+      items[strTime].push({
+        name: 'Item for ' + strTime + ' #' + j,
+        height: Math.max(50, Math.floor(Math.random() * 150)),
+        day: strTime
+      });
+    }
+    
+    const newItems: AgendaSchedule = {};
+    Object.keys(items).forEach(key => {
+      newItems[key] = items[key];
+    });
+    setItems(newItems)
+  }
+
   const renderItem = () => {return <View />;}
   const renderEmptyDate = () => {return <View />;}
   const rowHasChanged = () => {}
+  const onDayPress = (day: DateData) => {
+    
+  }
+
+  const getToday = () => {
+    const date = new Date();
+    return date.toISOString().split('T')[0];
+  }
 
   return (
     <View style={styles.container}>
@@ -21,10 +69,11 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
         style={styles.agenda}
         items={items}
         loadItemsForMonth={loadItems}
-        selected={'2017-05-16'}
+        selected={getToday()}
         renderItem={renderItem}
         renderEmptyDate={renderEmptyDate}
         showClosingKnob={true}
+        onDayPress={onDayPress}
         // markingType={'period'}
         // markedDates={{
         //    '2017-05-08': {textColor: '#43515c'},

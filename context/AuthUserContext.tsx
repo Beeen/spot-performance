@@ -1,9 +1,9 @@
 // import React from 'react';
-import React, { useState } from 'react';
+import React, { useState, createContext } from 'react';
 import { AuthUserContextType } from 'types';
 
 
-export const AuthUserContext = React.createContext<AuthUserContextType | null>(null);
+export const AuthUserContext = createContext<AuthUserContextType | undefined>(undefined);
 
 type Action =
  | { type: 'LOADING_FINISHED'}
@@ -21,19 +21,19 @@ const AuthUserProvider: React.FC<Props> = ({ children }) => {
 
     const onLoadingFinished = () => {
         console.log('On Loading Finished')
-        //this.setState({isLoading:false});
+        setLoading(false)
         dispatch({ type: 'LOADING_FINISHED' })
     };
 
     const onSignOut = () => {
         console.log('On Signed Out')
-        //this.setState({isLoading:true});
+        setLoading(true)
         dispatch({ type: 'SIGN_OUT' })
     };
 
     const setUserId = (uid: string) => {
         console.log('Retrieved user\'s firebase UID: ' + uid)
-        //this.setState({userId:uid});
+        setUser(uid)
         dispatch({ type: 'SET_USER_UID', userId: uid })
     }
 

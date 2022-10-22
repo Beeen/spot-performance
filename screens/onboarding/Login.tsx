@@ -53,8 +53,8 @@ export default function Login({ navigation }: OnboardingStackScreenProps<'Login'
 
         const firebaseService = new FirebaseService()
         firebaseService.loadUser(authUser.uid)
-            .then(({ userSnapshot }) => {
-                if (userSnapshot.exists) {
+            .then(userSnapshot => {
+                if (userSnapshot.exists()) {
                     console.log('onLoginSuccess: The user has an account')
                     //this.context.onLoadingFinished()
                 }

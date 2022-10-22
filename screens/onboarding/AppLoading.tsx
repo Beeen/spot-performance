@@ -8,23 +8,25 @@ import {
 import firebase from '@services/firebase/FirebaseConfig';
 //import AuthUserContext from '@context/AuthUserContext';
 import FirebaseService from '@services/firebase/FirebaseService';
-import { OnboardingStackScreenProps } from 'types';
+import { AuthUserContextType, OnboardingStackScreenProps } from 'types';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import {AuthUserContext} from '@context/AuthUserContext';
 
 export default function AppLoading({ navigation }: OnboardingStackScreenProps<'AppLoading'>) {
     //const { state, onLoadingFinished, setUserId } = useContext(AuthUserContext);
+    const {setUserId, onLoadingFinished} = useContext(AuthUserContext) as AuthUserContextType;
 
     const checkUserAccount = (authUser: User) => {
 
         console.log('AppLoading: ' + authUser.uid)
-        //setUserId(authUser.uid)
+        setUserId(authUser.uid)
 
         const firebaseService = new FirebaseService()
         firebaseService.loadUser(authUser.uid)
-            .then(({ userSnapshot }) => {
-                if (userSnapshot.exists) {
+            .then(userSnapshot => {
+                if (userSnapshot.exists()) {
                     console.log('AppLoading: The user has an account')
-                    //onLoadingFinished()
+                    onLoadingFinished()
                 }
                 else{
                     console.log('AppLoading: The user doesn\'t have an account')
@@ -53,12 +55,12 @@ export default function AppLoading({ navigation }: OnboardingStackScreenProps<'A
         const auth = getAuth(firebase);
         const unsubscribe = onAuthStateChanged(auth, (user) => { // detaching the listener
 
-            console.log('AppLoading: AuthStateChanged')
-
             if (user) {
+                console.log('AppLoading: AuthStateChanged, User is logged In')
                 // ...your code to handle authenticated users. 
                 checkUserAccount(user)
             } else {
+                console.log('AppLoading: AuthStateChanged, User is NOT logged In')
                 // No user is signed in...code to handle unauthenticated users.
                 navigation.navigate('Login') 
             }
