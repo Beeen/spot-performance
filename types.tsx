@@ -57,3 +57,9 @@ export type AuthUserContextType = {
   onSignOut: () => void;
   setUserId: (userId: string) => void;
 };
+
+export type Booking = {
+  reference: string
+  time: string
+  user: string
+}

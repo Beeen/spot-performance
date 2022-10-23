@@ -30,6 +30,17 @@ export default class FirebaseService {
         return { ref: ref }
     }
 
+    async createBooking(reference, time, uid) {
+        var bookingRef = doc(this.firestore, "bookings", time);
+        const ref = await setDoc(bookingRef, {
+            reference: reference,
+            time: time,
+            user: uid
+        });
+
+        return { ref: ref }
+    }
+
     // async createPage(userID, name, profilePic, coverPic) {
 
     //     try {
