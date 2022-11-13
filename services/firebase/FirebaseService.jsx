@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import firebase from './FirebaseConfig'
-import { collection, getFirestore, getDoc, doc, setDoc } from "firebase/firestore";
+import { collection, getFirestore, getDoc, doc, setDoc, addDoc } from "firebase/firestore";
 
 
 export default class FirebaseService {
@@ -31,8 +31,8 @@ export default class FirebaseService {
     }
 
     async createBooking(reference, time, uid) {
-        var bookingRef = doc(this.firestore, "bookings", time);
-        const ref = await setDoc(bookingRef, {
+        var bookingRef = collection(this.firestore, "bookings");
+        const ref = await addDoc(bookingRef, {
             reference: reference,
             time: time,
             user: uid

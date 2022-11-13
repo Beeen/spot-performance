@@ -62,13 +62,16 @@ function BottomTabNavigator() {
       initialRouteName="BookTab"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
-      }}>
+        tabBarStyle: {
+          backgroundColor: '#1A1A1A',
+        },
+    }}>
       <BottomTab.Screen
         name="BookTab"
         component={BookTabScreen}
         options={({ navigation }: RootTabScreenProps<'BookTab'>) => ({
           title: 'Book',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
           headerRight: () => (
             <Pressable
               onPress={() => navigation.navigate('Modal')}
@@ -76,7 +79,7 @@ function BottomTabNavigator() {
                 opacity: pressed ? 0.5 : 1,
               })}>
               <FontAwesome
-                name="info-circle"
+                name="filter"
                 size={25}
                 color={Colors[colorScheme].text}
                 style={{ marginRight: 15 }}
@@ -90,7 +93,7 @@ function BottomTabNavigator() {
         component={PurchaseTabScreen}
         options={{
           title: 'Purchase',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
         }}
       />
     </BottomTab.Navigator>

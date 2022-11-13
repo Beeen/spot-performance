@@ -60,6 +60,6 @@ export type AuthUserContextType = {
 
 export type Booking = {
   reference: string
-  time: string
+  time: number
   user: string
 }

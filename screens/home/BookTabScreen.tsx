@@ -15,74 +15,94 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
   const {userId} = useContext(AuthUserContext) as AuthUserContextType;
   const initialItems: AgendaSchedule = {}
   const [items, setItems] = useState(initialItems)
-  const initialBookings: { [time: string] : Booking; }  = {}
+  const initialBookings: { [time: number] : Booking; }  = {}
   const [bookings, setBookings] = useState(initialBookings)
   const [isFiltered, setFiltered] = useState(false)
-  const [currentDate, setCurrentDate] = useState("")
+  const [currentDate, setCurrentDate] = useState(new Date())
   const openTime = 8
   const closeTime = 17
 
   // Should be called only once when component mounts
   useEffect(() => {
-    setCurrentDate(getToday())
+    console.log("LIFECYCLE: Component Mounted");
+    setCurrentDate(new Date())
   }, []);
 
   // Should be called when the bookings on the day we are observing changes
   useEffect(() => {
-    console.log("Bookings state updated. Num items: " + Object.keys(bookings).length);
-    updateBookings(currentDate)
+    const currentStrTime = currentDate.toISOString().split('T')[0]
+    console.log("LIFECYCLE: Bookings state updated. Current Date: " + currentStrTime + " Num items: " + Object.keys(bookings).length);
+    updateBookings(currentStrTime)
   }, [bookings]);
 
   // Should be called when the user filters or un-filters the bookings
   useEffect(() => {
-    
+    console.log("LIFECYCLE: Filter state updated");
   }, [isFiltered]);
 
+  // Should be called when the user filters or un-filters the bookings
+  useEffect(() => {
+    console.log("LIFECYCLE: Current date updated");
+  }, [currentDate]);
+
   const loadItems = (day: DateData) => {
-    console.log('Loading items for day: ' + day.dateString)
-    const firestore = getFirestore(firebase);
-    const startKey = day.dateString + ("00" + (openTime)).slice (-2);
-    console.log('StartKey: ' + startKey)
-    const endKey = day.dateString + ("00" + (closeTime)).slice (-2);
-    console.log('End key: ' + endKey)
-    //const bookingsQuery = query(collection(firestore, "bookings"), where("time", ">=", startKey), where("time", "<=", endKey));
-    console.log('startKey < endKey: ' + startKey < endKey)
-    const bookingsQuery = query(collection(firestore, "bookings"), where("time", ">=", startKey), where("time", "<=", endKey));
-    const unsub = onSnapshot(bookingsQuery, (bookingsSnap) => {
-      const bookings: { [time: string] : Booking; } = {}
-      bookingsSnap.forEach((doc) => {
-        console.log('Found booking for: ' + doc.data().time)
-        bookings[doc.data().time] = {
-          reference: doc.data().reference,
-          time: doc.data().time,
-          user: doc.data().user
-        }
+    console.log('Should load items for day: ' + day.dateString)
+    // For some reason, the Agenda tries to load a random past date
+    // This logic only happens if we have expressively set currentDate when the user presses a day
+    const dayToLoad = new Date(day.timestamp)
+    if (dayToLoad.getDay() == currentDate.getDay())
+    {
+      console.log('Loading items for day: ' + day.dateString)
+      const firestore = getFirestore(firebase);
+
+      const date = new Date(day.timestamp)
+      const startKey = getTimeKey(date, openTime)
+      console.log('StartKey: ' + startKey)
+
+      const endKey = getTimeKey(date, closeTime)
+      console.log('End key: ' + endKey)
+
+      //console.log('startKey < endKey: ' + startKey < endKey)
+      const bookingsQuery = query(collection(firestore, "bookings"), where("time", ">=", startKey), where("time", "<=", endKey));
+      const unsub = onSnapshot(bookingsQuery, (bookingsSnap) => {
+        const bookings: { [time: string] : Booking; } = {}
+        bookingsSnap.forEach((doc) => {
+          console.log('Found booking for: ' + doc.data().time)
+          bookings[doc.data().time] = {
+            reference: doc.data().reference,
+            time: doc.data().time,
+            user: doc.data().user
+          }
+        });
+        console.log("Current bookings for day : ", Object.keys(bookings).length);
+        setBookings(bookings)
       });
-      // console.log("Current bookings for day : ", bookings.join(", "));
-      setBookings(bookings)
-    });
+    }
   }
 
   const updateBookings = (strTime: string) => {
+    //console.log("Updating bookings for strTime : ", strTime);
+    //console.log("Updating bookings for day : ", currentDate.toString());
     items[strTime] = [];
     
     for (let j = openTime; j < closeTime; j++) {
-      const key = strTime + ("00" + (j)).slice (-2);
+      const key = getTimeKey(currentDate, j);
       console.log('Checking bookings for time: ' + key)
       if (bookings[key] != undefined) {
         console.log('Found booking for time: ' + key)
         items[strTime].push({
           name: bookings[key].reference,
-          height: 1,
-          day: bookings[key].time
+          height: bookings[key].time,
+          day: bookings[key].user
         });
       }
       else {
         const hour = ("00" + (j)).slice (-2);
+        const endHour = ("00" + (j + 1)).slice (-2);
         items[strTime].push({
-          name: 'Item for ' + strTime + ' #' + hour,
-          height: 0,
-          day: strTime + hour
+          name: 'Book from ' + hour + "h to " + endHour + "h " + key,
+          height: key,
+          day: ""
         });
       }
     }
@@ -99,22 +119,39 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
   const renderItem = (reservation: AgendaEntry, isFirst: boolean) => {
     const fontSize = 14;
     const color = 'black';
+    const height = 70;
 
-    return (
-      <TouchableOpacity
-        testID={testIDs.agenda.ITEM}
-        style={[styles.item, {height: 50}]}
-        onPress={() => availableSlotTapped(reservation)}
-      >
-        <Text style={{fontSize, color}}>{reservation.name}</Text>
-      </TouchableOpacity>
-    );
+    if (reservation.day == "")
+    {
+      return (
+        <TouchableOpacity
+          testID={testIDs.agenda.ITEM}
+          style={[styles.item, {height: height, backgroundColor: 'green',}]}
+          onPress={() => availableSlotTapped(reservation)}
+        >
+          <Text style={{fontSize, color}}>{reservation.name}</Text>
+        </TouchableOpacity>
+      );
+    }
+    else {
+      return (
+        <TouchableOpacity
+          testID={testIDs.agenda.ITEM}
+          style={[styles.item, {height: height, backgroundColor: 'red',}]}
+          onPress={() => bookedSlotTapped(reservation)}
+        >
+          <Text style={{fontSize, color}}>Reference: {reservation.name}</Text>
+          <Text style={{fontSize, color}}>User: {reservation.day}</Text>
+        </TouchableOpacity>
+      );
+    }
   }
 
   const renderEmptyDate = () => {return <View />;}
   const rowHasChanged = () => {}
   const onDayPress = (day: DateData) => {
-    
+    console.log('Day pressed')
+    setCurrentDate(new Date(day.timestamp))
   }
 
   const availableSlotTapped = (reservation: AgendaEntry) => {
@@ -126,11 +163,27 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
         onPress: () => console.log("Cancel Pressed"),
         style: "cancel"
       },
-      { text: "Book", onPress: reference => createBooking(reservation.day, reference)}
+      { text: "Book", onPress: reference => createBooking(reservation.height, reference)}
     ])
   }
 
-  const createBooking = (time: string, reference?: string) => {
+  const bookedSlotTapped = (reservation: AgendaEntry) => {
+    if (userId == reservation.day)
+    {
+      Alert.prompt("Edit a booking reference",
+    "Do you want to change your booking reference?",
+    [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel"
+      },
+      { text: "Confirm", onPress: reference => editBooking(reservation.height, reference)}
+    ])
+    }
+  }
+
+  const createBooking = (time: number, reference?: string) => {
     if (reference != undefined) { 
       const firebaseService = new FirebaseService()
       firebaseService.createBooking(reference, time, userId)
@@ -143,15 +196,43 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
                       //Ben : I don't know why it returns 'undefined' even when it succeeds, ignoring errors
                       console.log('There was an error creating the booking')
                   }
+              }).catch(({ error }) => {
+                console.log('There was an error creating the booking: ' + error)
               })
     }
-    
+  }
+
+  const editBooking = (time: number, reference?: string) => {
+    if (reference != undefined) { 
+      const firebaseService = new FirebaseService()
+      firebaseService.createBooking(reference, time, userId)
+              .then(({ ref }) => {
+
+                  if (ref != undefined) {
+                      console.log('The booking has been created')
+                  }
+                  else{
+                      //Ben : I don't know why it returns 'undefined' even when it succeeds, ignoring errors
+                      console.log('There was an error creating the booking')
+                  }
+              }).catch(({ error }) => {
+                console.log('There was an error creating the booking: ' + error)
+              })
+    }
   }
 
   const getToday = () => {
     const date = new Date();
     const strTime = date.toISOString().split('T')[0]
     return strTime;
+  }
+
+  const getTimeKey = (date: Date, hour: number) => {
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDay() - 1
+    const timeKey = year * 1000000 + month * 10000 + day * 100 + hour
+    return timeKey
   }
 
   return (
@@ -166,6 +247,32 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
         showClosingKnob={true}
         onDayPress={onDayPress}
         showOnlySelectedDayItems={true}
+        theme={{
+          backgroundColor: '#000000',
+          calendarBackground: '#000000',
+          //textSectionTitleColor: '#b6c1cd',
+          // textSectionTitleDisabledColor: '#d9e1e8',
+          selectedDayBackgroundColor: '#CF0E20',
+          // selectedDayTextColor: '#ffffff',
+          todayTextColor: '#CF0E20',
+          dayTextColor: 'white',
+          // textDisabledColor: '#d9e1e8',
+          // dotColor: '#00adf5',
+          // selectedDotColor: '#ffffff',
+          // arrowColor: 'orange',
+          // disabledArrowColor: '#d9e1e8',
+          monthTextColor: 'white',
+          // indicatorColor: 'blue',
+          // textDayFontFamily: 'monospace',
+          // textMonthFontFamily: 'monospace',
+          // textDayHeaderFontFamily: 'monospace',
+          // textDayFontWeight: '300',
+          // textMonthFontWeight: 'bold',
+          // textDayHeaderFontWeight: '300',
+          // textDayFontSize: 16,
+          // textMonthFontSize: 16,
+          // textDayHeaderFontSize: 16
+        }}
         // markingType={'period'}
         // markedDates={{
         //    '2017-05-08': {textColor: '#43515c'},
@@ -189,7 +296,6 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
 
 const styles = StyleSheet.create({
   item: {
-    backgroundColor: 'white',
     flex: 1,
     borderRadius: 5,
     padding: 10,
@@ -208,6 +314,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#000000'
   },
   title: {
     fontSize: 20,
