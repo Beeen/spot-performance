@@ -16,6 +16,7 @@ import ModalScreen from './ModalScreen';
 import NotFoundScreen from './NotFoundScreen';
 import BookTabScreen from './BookTabScreen';
 import PurchaseTabScreen from './PurchaseTabScreen';
+import AccountTabScreen from './AccountTabScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../../types';
 import LinkingConfiguration from '../../navigation/LinkingConfiguration';
 
@@ -93,6 +94,14 @@ function BottomTabNavigator() {
         component={PurchaseTabScreen}
         options={{
           title: 'Purchase',
+          tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
+        }}
+      />
+      <BottomTab.Screen
+        name="AccountTab"
+        component={AccountTabScreen}
+        options={{
+          title: 'Account',
           tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
         }}
       />

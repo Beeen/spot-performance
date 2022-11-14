@@ -15,7 +15,7 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
   const {userId} = useContext(AuthUserContext) as AuthUserContextType;
   const initialItems: AgendaSchedule = {}
   const [items, setItems] = useState(initialItems)
-  const initialBookings: { [time: number] : Booking; }  = {}
+  const initialBookings: { [time: number] : Booking; } = {}
   const [bookings, setBookings] = useState(initialBookings)
   const [isFiltered, setFiltered] = useState(false)
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -126,7 +126,7 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
       return (
         <TouchableOpacity
           testID={testIDs.agenda.ITEM}
-          style={[styles.item, {height: height, backgroundColor: 'green',}]}
+          style={[styles.item, {height: height, opacity: 1}]}
           onPress={() => availableSlotTapped(reservation)}
         >
           <Text style={{fontSize, color}}>{reservation.name}</Text>
@@ -137,11 +137,11 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
       return (
         <TouchableOpacity
           testID={testIDs.agenda.ITEM}
-          style={[styles.item, {height: height, backgroundColor: 'red',}]}
+          style={[styles.item, {height: height, opacity: 0.5}]}
           onPress={() => bookedSlotTapped(reservation)}
         >
           <Text style={{fontSize, color}}>Reference: {reservation.name}</Text>
-          <Text style={{fontSize, color}}>User: {reservation.day}</Text>
+          {/* <Text style={{fontSize, color}}>User: {reservation.day}</Text> */}
         </TouchableOpacity>
       );
     }
@@ -300,7 +300,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginRight: 10,
-    marginTop: 17
+    marginTop: 17,
+    backgroundColor: 'white'
   },
   emptyDate: {
     height: 15,
