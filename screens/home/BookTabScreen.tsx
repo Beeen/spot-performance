@@ -1,15 +1,17 @@
 import React, { useContext, useDebugValue, useEffect, useState } from 'react';
-import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import { Alert, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
 
 import EditScreenInfo from '../../components/EditScreenInfo';
 import firebase from '../../services/firebase/FirebaseConfig'
 import {getFirestore, query, where, collection, onSnapshot } from "firebase/firestore";
 import { Text, View } from '../../components/Themed';
-import { AuthUserContextType, Booking, RootTabScreenProps } from '../../types';
+import { AuthUserContextType, Booking, NewAgenda, RootTabScreenProps } from '../../types';
 import {Agenda, DateData, AgendaEntry, AgendaSchedule} from 'react-native-calendars';
 import testIDs from '../../testIDs';
 import FirebaseService from '@services/firebase/FirebaseService';
 import {AuthUserContext} from '@context/AuthUserContext';
+import { FontAwesome } from '@expo/vector-icons';
+import Colors from 'constants/Colors';
 
 export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTab'>) {
   const {userId} = useContext(AuthUserContext) as AuthUserContextType;
@@ -21,6 +23,24 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
   const [currentDate, setCurrentDate] = useState(new Date())
   const openTime = 8
   const closeTime = 17
+
+  useEffect(() => {
+    // Use `setOptions` to update the button that we previously specified
+    // Now the button includes an `onPress` handler to update the count
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable
+        onPress={() => headerPressed()}
+        >
+          <FontAwesome
+            name="filter"
+            size={25}
+            style={{ marginRight: 15, color: isFiltered ? 'red' : 'white' }}
+          />
+        </Pressable>
+      ),
+    });
+  }, [navigation, isFiltered]);
 
   // Should be called only once when component mounts
   useEffect(() => {
@@ -38,6 +58,8 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
   // Should be called when the user filters or un-filters the bookings
   useEffect(() => {
     console.log("LIFECYCLE: Filter state updated");
+    const currentStrTime = currentDate.toISOString().split('T')[0]
+    updateBookings(currentStrTime)
   }, [isFiltered]);
 
   // Should be called when the user filters or un-filters the bookings
@@ -45,39 +67,41 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
     console.log("LIFECYCLE: Current date updated");
   }, [currentDate]);
 
+  const headerPressed = () => {
+    console.log("HeaderButton Pressed");
+    setFiltered(isFiltered => !isFiltered)
+  }
+
   const loadItems = (day: DateData) => {
     console.log('Should load items for day: ' + day.dateString)
     // For some reason, the Agenda tries to load a random past date
     // This logic only happens if we have expressively set currentDate when the user presses a day
-    const dayToLoad = new Date(day.timestamp)
-    if (dayToLoad.getDay() == currentDate.getDay())
-    {
-      console.log('Loading items for day: ' + day.dateString)
-      const firestore = getFirestore(firebase);
+    console.log('Loading items for day: ' + day.dateString)
+    const firestore = getFirestore(firebase);
 
-      const date = new Date(day.timestamp)
-      const startKey = getTimeKey(date, openTime)
-      console.log('StartKey: ' + startKey)
+    const date = new Date(day.timestamp)
+    console.log('Todays date: ' + date.toDateString())
+    const startKey = getTimeKey(date, openTime)
+    console.log('StartKey: ' + startKey)
 
-      const endKey = getTimeKey(date, closeTime)
-      console.log('End key: ' + endKey)
+    const endKey = getTimeKey(date, closeTime)
+    console.log('End key: ' + endKey)
 
-      //console.log('startKey < endKey: ' + startKey < endKey)
-      const bookingsQuery = query(collection(firestore, "bookings"), where("time", ">=", startKey), where("time", "<=", endKey));
-      const unsub = onSnapshot(bookingsQuery, (bookingsSnap) => {
-        const bookings: { [time: string] : Booking; } = {}
-        bookingsSnap.forEach((doc) => {
-          console.log('Found booking for: ' + doc.data().time)
-          bookings[doc.data().time] = {
-            reference: doc.data().reference,
-            time: doc.data().time,
-            user: doc.data().user
-          }
-        });
-        console.log("Current bookings for day : ", Object.keys(bookings).length);
-        setBookings(bookings)
+    //console.log('startKey < endKey: ' + startKey < endKey)
+    const bookingsQuery = query(collection(firestore, "bookings"), where("time", ">=", startKey), where("time", "<=", endKey));
+    const unsub = onSnapshot(bookingsQuery, (bookingsSnap) => {
+      const bookings: { [time: string] : Booking; } = {}
+      bookingsSnap.forEach((doc) => {
+        console.log('Found booking for: ' + doc.data().time)
+        bookings[doc.data().time] = {
+          reference: doc.data().reference,
+          time: doc.data().time,
+          user: doc.data().user
+        }
       });
-    }
+      console.log("Current bookings for day : ", Object.keys(bookings).length);
+      setBookings(bookings)
+    });
   }
 
   const updateBookings = (strTime: string) => {
@@ -96,7 +120,7 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
           day: bookings[key].user
         });
       }
-      else {
+      else if (!isFiltered) {
         const hour = ("00" + (j)).slice (-2);
         const endHour = ("00" + (j + 1)).slice (-2);
         items[strTime].push({
@@ -156,7 +180,7 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
 
   const availableSlotTapped = (reservation: AgendaEntry) => {
     Alert.prompt("Make a booking",
-    "Do you want to book?",
+    "Enter a reference for your booking",
     [
       {
         text: "Cancel",
@@ -230,7 +254,9 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
   const getTimeKey = (date: Date, hour: number) => {
     const year = date.getFullYear()
     const month = date.getMonth() + 1
-    const day = date.getDay() - 1
+    //console.log('GetMonth: ' + month)
+    const day = date.getDate()
+    //console.log('GetDay: ' + day)
     const timeKey = year * 1000000 + month * 10000 + day * 100 + hour
     return timeKey
   }
@@ -250,6 +276,8 @@ export default function BookTabScreen({ navigation }: RootTabScreenProps<'BookTa
         theme={{
           backgroundColor: '#000000',
           calendarBackground: '#000000',
+          agendaDayTextColor: '#CF0E20',
+          agendaTodayColor: '#CF0E20',
           //textSectionTitleColor: '#b6c1cd',
           // textSectionTitleDisabledColor: '#d9e1e8',
           selectedDayBackgroundColor: '#CF0E20',

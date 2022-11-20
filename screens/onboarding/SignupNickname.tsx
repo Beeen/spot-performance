@@ -47,7 +47,7 @@ export default function SignupNickname({ navigation }: OnboardingStackScreenProp
         <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }}>
             <SafeAreaView style={{ flex: 1 }}>
                 <View style={styles.container}>
-                    <Text style={styles.label}>C'est quoi ton prénom?</Text>
+                    <Text style={styles.label}>What's your name?</Text>
                     {/* <Input
                         placeholder='RECHERCHER'
                         style={styles.input}
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: 'center',
-        backgroundColor: '#2F2F2F'
+        backgroundColor: '#000000'
     },
     label:{
         fontSize: 20,
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     input: {
         height: 60,
         marginTop: 15,
-        borderColor: '#A1C332',
+        borderColor: '#ffffff',
         borderWidth: 2,
         borderRadius: 8,
         width: '80%',
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
         color: 'white'
     },
     continueBackground: {
-        backgroundColor: '#A1C332',
+        backgroundColor: '#ffffff',
         height: 50,
         width: '80%',
         flexDirection: "row",
@@ -101,6 +101,6 @@ const styles = StyleSheet.create({
     continueButtonText: {
         letterSpacing: 0.5,
         fontSize: 16,
-        color: "#FFFFFF"
+        color: "black"
     }
 });

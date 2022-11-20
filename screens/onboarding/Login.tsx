@@ -6,7 +6,7 @@ import {
     Image,
     SafeAreaView,
     TouchableOpacity,
-    TextInput
+    TextInput,
     KeyboardAvoidingView,
     ActivityIndicator,
     TouchableWithoutFeedback,
@@ -20,10 +20,11 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useContext, useState, useRef } from 'react';
 import { OnboardingStackScreenProps } from 'types';
-import { getAuth, signInAnonymously, User } from "firebase/auth";
-import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+import { getAuth, PhoneAuthProvider, signInWithPhoneNumber, signInWithCredential ,User, ApplicationVerifier } from "firebase/auth";
+import { FirebaseRecaptchaVerifier, FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import Constants from 'expo-constants';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import {firebaseConfig} from '@services/firebase/FirebaseConfig';
 
 export default function Login({ navigation }: OnboardingStackScreenProps<'Login'>) {
 
@@ -33,55 +34,50 @@ export default function Login({ navigation }: OnboardingStackScreenProps<'Login'
 
     const [phoneNumber, setPhoneNumber] = useState('');
     const [code, setCode] = useState('');
-    const [verificationId, setVerificationId] = useState(null);
-    const recaptchaVerifier = useRef(null);
+    const [verificationId, setVerificationId] = useState("");
+    //const applicationVerifier = new FirebaseRecaptchaVerifierModal();
+    const recaptchaVerifier = useRef<FirebaseRecaptchaVerifierModal>(null);
+    const auth = getAuth();
 
     const sendVerification = () => {
-        const phoneProvider = new firebase.auth.PhoneAuthProvider();
-        phoneProvider
-        .verifyPhoneNumber(phoneNumber, recaptchaVerifier.current)
-        .then(setVerificationId);
-    };
+        // Tuto
+        // const phoneProvider = new firebase.auth.PhoneAuthProvider();
+        // phoneProvider.verifyPhoneNumber(phoneNumber, recaptchaVerifier.current).then(setVerificationId);
 
-    const confirmCode = () => {
-        const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, code);
-        firebase.auth().signInWithCredential(credential).then((result) => {
-            console.log(result);
+        // Firebase Docs
+        // const appVerifier = window.recaptchaVerifier;
+        // const auth = getAuth();
+        // signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+        //     .then((confirmationResult) => {
+        //     // SMS sent. Prompt user to type the code from the message, then sign the
+        //     // user in with confirmationResult.confirm(code).
+        //     window.confirmationResult = confirmationResult;
+        //     // ...
+        //     }).catch((error) => {
+        //     // Error; SMS not sent
+        //     // ...
+        //     });
+
+        // Expo docs
+        const phoneProvider = new PhoneAuthProvider(auth);
+        phoneProvider.verifyPhoneNumber(phoneNumber, recaptchaVerifier!.current!).then((verificationId) => {
+            console.log("Verification ID: " + verificationId)
+            setVerificationId(verificationId)
         });
     };
 
-    return (
-        <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-        <View>
-            <FirebaseRecaptchaVerifierModal
-            ref={recaptchaVerifier}
-            firebaseConfig={Constants.manifest.extra.firebase}
-            />
-            <TextInput
-            placeholder="Phone Number"
-            onChangeText={setPhoneNumber}
-            keyboardType="phone-pad"
-            autoCompleteType="tel"
-            style={styles.textInput}
-            />
-            <TouchableOpacity
-            style={styles.sendVerification}
-            onPress={sendVerification}
-            >
-            <Text style={styles.buttonText}>Send Verification</Text>
-            </TouchableOpacity>
-            <TextInput
-            placeholder="Confirmation Code"
-            onChangeText={setCode}
-            keyboardType="number-pad"
-            style={styles.textInput}
-            />
-            <TouchableOpacity style={styles.sendCode} onPress={confirmCode}>
-            <Text style={styles.buttonText}>Send Verification</Text>
-            </TouchableOpacity>
-        </View>
-        </KeyboardAwareScrollView>
-    )
+    const confirmCode = () => {
+
+        const credential = PhoneAuthProvider.credential(verificationId, code);
+        signInWithCredential(auth, credential).then((result) => {
+            console.log(result);
+        });
+
+        // var credential = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId, code);
+        // signInWithCredential(credential).then((result) => {
+        //     console.log(result);
+        // });
+    };
 
     // const signInAnynomously = () => {
     //     const auth = getAuth(firebase)
@@ -125,60 +121,97 @@ export default function Login({ navigation }: OnboardingStackScreenProps<'Login'
     //     setErrorMessage(errorMessage)
     // }
 
-    // const renderLoading = () => {
-    //     if (loading) {
-    //         return (
-    //             <View>
-    //                 <ActivityIndicator size={'large'} />
-    //             </View>
-    //         );
-    //     }
-    // }
+    const renderLoading = () => {
+        if (loading) {
+            return (
+                <View>
+                    <ActivityIndicator size={'large'} />
+                </View>
+            );
+        }
+    }
 
-    // return (
-    //     <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }}>
-    //         <SafeAreaView style={{ flex: 1 }}>
-    //             <KeyboardAvoidingView style={styles.container} behavior="padding">
-    //                 <View style={styles.topContainer}>
-    //                     <Image style={styles.logo} source={require('@assets/logo.png')} />
-    //                     <Text style={styles.header}>
-    //                         Spot Performance
-    //                     </Text>
-    //                     <Text style={styles.subtitle}>
-    //                         Make it yours
-    //                     </Text>
-    //                 </View>
-    //                 {renderLoading()}
-    //                 <View style={styles.bottomContainer}>
-    //                     <TouchableOpacity style={styles.facebookButtonBackground} onPress={() => signInAnynomously()}>
-    //                         <Text style={styles.facebookButtonText}>
-    //                             Sign-in
-    //                         </Text>
-    //                     </TouchableOpacity>
-    //                 </View>
-    //             </KeyboardAvoidingView>
-    //         </SafeAreaView>
-    //     </TouchableWithoutFeedback>
-    // );
+    const displayPhoneInput = () => {
+        return (
+            <><TextInput
+            placeholder="Phone Number"
+            onChangeText={setPhoneNumber}
+            autoFocus
+            keyboardType="phone-pad"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
+            style={styles.textInput} />
+            <TouchableOpacity
+                style={styles.sendVerification}
+                onPress={sendVerification}
+            >
+            <Text style={styles.buttonText}>Send Verification</Text>
+            </TouchableOpacity></>);
+    }
+
+    const displayCodeInput = () => {
+        return (
+                <><TextInput
+                placeholder="Confirmation Code"
+                onChangeText={setCode}
+                keyboardType="number-pad"
+                style={styles.textInput} />
+                <TouchableOpacity style={styles.sendCode} onPress={confirmCode}>
+                    <Text style={styles.buttonText}>Send Verification</Text>
+                </TouchableOpacity></>
+        );
+    }
+
+    return (
+        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); }}>
+            <SafeAreaView style={{ flex: 1 }}>
+                <KeyboardAvoidingView style={styles.container} behavior="padding">
+                    <FirebaseRecaptchaVerifierModal
+                        ref={recaptchaVerifier}
+                        firebaseConfig={firebaseConfig}
+                    />
+                    <View style={styles.topContainer}>
+                        <Image style={styles.logo} source={require('@assets/logo.png')} />
+                        <Text style={styles.header}>
+                            Spot Performance
+                        </Text>
+                        <Text style={styles.subtitle}>
+                            Make it yours
+                        </Text>
+                    </View>
+                    {renderLoading()}
+                    {/* <KeyboardAwareScrollView contentContainerStyle={styles.container}>
+                    <View>
+                        
+                    </View>
+                    </KeyboardAwareScrollView> */}
+                    <View style={styles.bottomContainer}>
+                        {verificationId ?  displayCodeInput() : displayPhoneInput()}
+                    </View>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </TouchableWithoutFeedback>
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: "column",
-        alignItems: "stretch",
-        backgroundColor: '#2F2F2F'
+        backgroundColor: '#000000',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     header: {
         fontSize: 32,
         fontWeight: "700",
-        color: "#A1C332",
+        color: "#CF0E20",
     },
     subtitle: {
         marginTop: 20,
         fontSize: 20,
         fontWeight: "700",
-        color: "#A1C332",
+        color: "#CF0E20",
     },
     logo: {
         width: '50%',
@@ -186,12 +219,12 @@ const styles = StyleSheet.create({
         resizeMode: 'contain'
     },
     topContainer: {
-        flex: 2,
+        flex: 1,
         justifyContent: "center",
         alignItems: "center"
     },
     bottomContainer: {
-        flex: 1,
+        flex: 2,
         justifyContent: "center",
         alignItems: "center"
     },
@@ -209,12 +242,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#FFFFFF"
     },
-    container: {
-        flex: 1,
-        backgroundColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     textInput: {
         paddingTop: 40,
         paddingBottom: 20,
@@ -222,21 +249,22 @@ const styles = StyleSheet.create({
         fontSize: 24,
         borderBottomColor: '#7f8c8d33',
         borderBottomWidth: 2,
-        marginBottom: 10,
+        marginBottom: 20,
         textAlign: 'center',
+        color: 'white'
     },
     sendVerification: {
         padding: 20,
-        backgroundColor: '#3498db',
+        backgroundColor: 'white',
         borderRadius: 10,
     },
     sendCode: {
         padding: 20,
-        backgroundColor: '#9b59b6',
+        backgroundColor: 'white',
         borderRadius: 10,
     },
     buttonText: {
         textAlign: 'center',
-        color: '#ffffff',
+        color: 'black',
     },
 });

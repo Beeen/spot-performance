@@ -6,6 +6,7 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AgendaEntry } from 'react-native-calendars';
 
 declare global {
   namespace ReactNavigation {
@@ -64,3 +65,7 @@ export type Booking = {
   time: number
   user: string
 }
+
+export interface NewAgenda extends AgendaEntry {
+  bookingId: string
+} 

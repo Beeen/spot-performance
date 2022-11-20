@@ -25,6 +25,11 @@ const linking: LinkingOptions<RootStackParamList> = {
               PurchaseTabScreen: 'two',
             },
           },
+          AccountTab: {
+            screens: {
+              AccountTabScreen: 'three',
+            },
+          }
         },
       },
       Modal: 'modal',

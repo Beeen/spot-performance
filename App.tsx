@@ -21,6 +21,7 @@ export default function App() {
          <AuthUserProvider>
             <Routes/>
         </AuthUserProvider>
+        <StatusBar style="light" />
       </SafeAreaProvider>
       // To re-use later
       // <SafeAreaProvider>

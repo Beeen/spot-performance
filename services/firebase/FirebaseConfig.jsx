@@ -10,7 +10,7 @@ import { getAuth } from "firebase/auth";
 //import "firebase/storage";
 
 // Initialize Firebase
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyB4V3yo0u9vJZMeyqEQKpplPBYIV5u40pU",
   authDomain: "spotperformance-5602a.firebaseapp.com",
   projectId: "spotperformance-5602a",

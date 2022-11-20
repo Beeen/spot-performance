@@ -10,6 +10,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { ColorSchemeName, Pressable } from 'react-native';
 
+
 import Colors from '../../constants/Colors';
 import useColorScheme from '../../hooks/useColorScheme';
 import ModalScreen from './ModalScreen';
@@ -66,6 +67,13 @@ function BottomTabNavigator() {
         tabBarStyle: {
           backgroundColor: '#1A1A1A',
         },
+        headerStyle: {
+          backgroundColor: 'black',
+        },
+        headerTintColor: '#ffffff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
     }}>
       <BottomTab.Screen
         name="BookTab"
@@ -73,20 +81,6 @@ function BottomTabNavigator() {
         options={({ navigation }: RootTabScreenProps<'BookTab'>) => ({
           title: 'Book',
           tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
-          headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate('Modal')}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}>
-              <FontAwesome
-                name="filter"
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
-              />
-            </Pressable>
-          ),
         })}
       />
       <BottomTab.Screen
@@ -102,7 +96,7 @@ function BottomTabNavigator() {
         component={AccountTabScreen}
         options={{
           title: 'Account',
-          tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
       />
     </BottomTab.Navigator>
